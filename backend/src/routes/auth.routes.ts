@@ -80,7 +80,7 @@ router.get('/me', authenticate, async (req, res, next) => {
   try {
     const [rows] = await pool.execute(
       'SELECT id, name, email, created_at FROM users WHERE id = ? LIMIT 1',
-      [req.userId]
+      [req.userId!]
     );
     const user = (rows as Array<Record<string, unknown>>)[0];
     if (!user) {
