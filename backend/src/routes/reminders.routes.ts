@@ -43,7 +43,7 @@ router.get('/', async (req, res, next) => {
   try {
     const [rows] = await pool.execute<ReminderRow[]>(
       'SELECT id, title, description, due_at, priority, completed, created_at FROM reminders WHERE user_id = ? ORDER BY completed ASC, due_at IS NULL, due_at ASC, created_at DESC',
-      [req.userId]
+      [req.userId!]
     );
     res.json({ reminders: rows.map(serialize) });
   } catch (error) { next(error); }
@@ -63,7 +63,7 @@ router.post('/', async (req, res, next) => {
     );
     const [rows] = await pool.execute<ReminderRow[]>(
       'SELECT id, title, description, due_at, priority, completed, created_at FROM reminders WHERE id = ? AND user_id = ?',
-      [result.insertId, req.userId]
+      [result.insertId, req.userId!]
     );
     res.status(201).json({ reminder: serialize(rows[0]) });
   } catch (error) { next(error); }
@@ -83,7 +83,7 @@ router.patch('/:id', async (req, res, next) => {
     }
     const fields = parsed.data;
     const assignments: string[] = [];
-    const values: unknown[] = [];
+    const values: Array<string | number | boolean | null> = [];
     if (fields.title !== undefined) { assignments.push('title = ?'); values.push(fields.title); }
     if (fields.description !== undefined) { assignments.push('description = ?'); values.push(fields.description); }
     if (fields.dueAt !== undefined) {
@@ -92,7 +92,7 @@ router.patch('/:id', async (req, res, next) => {
     }
     if (fields.priority !== undefined) { assignments.push('priority = ?'); values.push(fields.priority); }
     if (fields.completed !== undefined) { assignments.push('completed = ?'); values.push(fields.completed); }
-    values.push(id, req.userId);
+    values.push(id, req.userId!);
     const [result] = await pool.execute<ResultSetHeader>(
       `UPDATE reminders SET ${assignments.join(', ')} WHERE id = ? AND user_id = ?`,
       values
