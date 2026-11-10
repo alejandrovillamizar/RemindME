@@ -10,7 +10,7 @@ router.use(authenticate);
 const reminderSchema = z.object({
   title: z.string().trim().min(1).max(160),
   description: z.string().trim().max(2000).optional().default(''),
-  dueAt: z.string().datetime().nullable().optional(),
+  dueAt: z.string().datetime().nullable().optional().refine(value => value == null || new Date(value).getTime() > Date.now(), 'La fecha y hora deben ser futuras.'),
   priority: z.enum(['Alta', 'Media', 'Baja']).default('Media')
 });
 const updateSchema = reminderSchema.partial().extend({
