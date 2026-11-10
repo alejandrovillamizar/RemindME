@@ -59,7 +59,7 @@ router.post('/', async (req, res, next) => {
     const { title, description, dueAt, priority } = parsed.data;
     const [result] = await pool.execute<ResultSetHeader>(
       'INSERT INTO reminders (user_id, title, description, due_at, priority) VALUES (?, ?, ?, ?, ?)',
-      [req.userId, title, description, dueAt ? new Date(dueAt).toISOString().slice(0, 19).replace('T', ' ') : null, priority]
+      [req.userId!, title, description, dueAt ? new Date(dueAt).toISOString().slice(0, 19).replace('T', ' ') : null, priority]
     );
     const [rows] = await pool.execute<ReminderRow[]>(
       'SELECT id, title, description, due_at, priority, completed, created_at FROM reminders WHERE id = ? AND user_id = ?',
@@ -103,7 +103,7 @@ router.patch('/:id', async (req, res, next) => {
     }
     const [rows] = await pool.execute<ReminderRow[]>(
       'SELECT id, title, description, due_at, priority, completed, created_at FROM reminders WHERE id = ? AND user_id = ?',
-      [id, req.userId]
+      [id, req.userId!]
     );
     res.json({ reminder: serialize(rows[0]) });
   } catch (error) { next(error); }
@@ -118,7 +118,7 @@ router.delete('/:id', async (req, res, next) => {
     }
     const [result] = await pool.execute<ResultSetHeader>(
       'DELETE FROM reminders WHERE id = ? AND user_id = ?',
-      [id, req.userId]
+      [id, req.userId!]
     );
     if (!result.affectedRows) {
       res.status(404).json({ message: 'No se encontró el recordatorio.' });
